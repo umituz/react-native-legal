@@ -1,0 +1,59 @@
+{
+  "name": "@umituz/react-native-legal",
+  "version": "1.0.0",
+  "description": "Legal screens for React Native apps - Terms of Service and Privacy Policy",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit",
+    "version:patch": "npm version patch -m 'chore: release v%s'",
+    "version:minor": "npm version minor -m 'chore: release v%s'",
+    "version:major": "npm version major -m 'chore: release v%s'"
+  },
+  "keywords": [
+    "react-native",
+    "legal",
+    "terms",
+    "privacy",
+    "terms-of-service",
+    "privacy-policy",
+    "legal-screen",
+    "ddd",
+    "domain-driven-design",
+    "type-safe",
+    "solid",
+    "dry",
+    "kiss"
+  ],
+  "author": "Ümit UZ <umit@umituz.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/umituz/react-native-legal.git"
+  },
+  "peerDependencies": {
+    "react": ">=18.2.0",
+    "react-native": ">=0.74.0",
+    "@umituz/react-native-design-system": "*",
+    "@umituz/react-native-theme": "*",
+    "@umituz/react-native-localization": "*",
+    "react-native-safe-area-context": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.45",
+    "@types/react-native": "^0.73.0",
+    "react": "^18.2.0",
+    "react-native": "^0.74.0",
+    "typescript": "^5.3.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ]
+}
+
