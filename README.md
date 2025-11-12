@@ -92,3 +92,6 @@ The component uses `@umituz/react-native-localization` for translations. Add the
 
 MIT
 
+
+
+
