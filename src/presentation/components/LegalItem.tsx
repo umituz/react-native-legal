@@ -7,7 +7,7 @@
 
 import React from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
-import { useAppDesignTokens } from "@umituz/react-native-theme";
+import { useAppDesignTokens } from "@umituz/react-native-design-system-theme";
 import { AtomicText, AtomicIcon } from "@umituz/react-native-design-system";
 import type { DesignTokens } from "@umituz/react-native-design-system";
 import type { IconName } from "@umituz/react-native-design-system";

@@ -13,7 +13,7 @@ npm install @umituz/react-native-legal
 - `react` >= 18.2.0
 - `react-native` >= 0.74.0
 - `@umituz/react-native-design-system`
-- `@umituz/react-native-theme`
+- `@umituz/react-native-design-system-theme`
 - `@umituz/react-native-localization`
 - `react-native-safe-area-context` >= 4.0.0
 
