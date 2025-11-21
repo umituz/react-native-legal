@@ -11,7 +11,7 @@ import React from "react";
 import { View, StyleSheet, Linking } from "react-native";
 import { useAppDesignTokens, type DesignTokens } from "@umituz/react-native-design-system-theme";
 import { AtomicText } from "@umituz/react-native-design-system-atoms";
-import { ScreenLayout } from "@umituz/react-native-design-system";
+import { ScreenLayout } from "@umituz/react-native-design-system-organisms";
 import { LegalItem } from "../components/LegalItem";
 
 export interface LegalScreenProps {
