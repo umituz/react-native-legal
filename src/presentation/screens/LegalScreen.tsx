@@ -9,13 +9,10 @@
 
 import React from "react";
 import { View, StyleSheet, Linking } from "react-native";
-import { useAppDesignTokens } from "@umituz/react-native-design-system-theme";
-import {
-  AtomicText,
-  ScreenLayout,
-} from "@umituz/react-native-design-system";
+import { useAppDesignTokens, type DesignTokens } from "@umituz/react-native-design-system-theme";
+import { AtomicText } from "@umituz/react-native-design-system-atoms";
+import { ScreenLayout } from "@umituz/react-native-design-system";
 import { LegalItem } from "../components/LegalItem";
-import type { DesignTokens } from "@umituz/react-native-design-system";
 
 export interface LegalScreenProps {
   /**

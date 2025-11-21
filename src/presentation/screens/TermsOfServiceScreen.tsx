@@ -8,7 +8,7 @@ import { View, ScrollView, StyleSheet, Linking } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppDesignTokens } from "@umituz/react-native-design-system-theme";
 import { useLocalization } from "@umituz/react-native-localization";
-import { AtomicText, AtomicButton } from "@umituz/react-native-design-system";
+import { AtomicText, AtomicButton } from "@umituz/react-native-design-system-atoms";
 
 export interface TermsOfServiceScreenProps {
   /**
@@ -128,6 +128,13 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
 });
+
+
+
+
+
+
+
 
 
 
