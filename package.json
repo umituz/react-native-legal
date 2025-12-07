@@ -1,6 +1,6 @@
 {
   "name": "@umituz/react-native-legal",
-  "version": "1.2.2",
+  "version": "1.3.0",
   "description": "Legal screens for React Native apps - Terms of Service and Privacy Policy",
   "main": "./src/index.ts",
   "types": "./src/index.ts",

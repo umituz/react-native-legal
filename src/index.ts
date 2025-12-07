@@ -19,6 +19,5 @@ export type { LegalScreenProps } from "./presentation/screens/LegalScreen";
 export { LegalItem } from "./presentation/components/LegalItem";
 export type { LegalItemProps } from "./presentation/components/LegalItem";
 
-
-
-
+export { LegalLinks } from "./presentation/components/LegalLinks";
+export type { LegalLinksProps } from "./presentation/components/LegalLinks";
