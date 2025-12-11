@@ -5,61 +5,100 @@
  */
 
 import React from "react";
-import { View, TouchableOpacity, StyleSheet, Linking } from "react-native";
+import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { AtomicText } from "@umituz/react-native-design-system-atoms";
-import { useAppDesignTokens } from "@umituz/react-native-design-system-theme";
-import { useLocalization } from "@umituz/react-native-localization";
 
 export interface LegalLinksProps {
+  /**
+   * Privacy Policy URL
+   */
   privacyPolicyUrl?: string;
+  /**
+   * Terms of Service URL
+   */
   termsOfServiceUrl?: string;
+  /**
+   * Privacy Policy link text
+   */
+  privacyText?: string;
+  /**
+   * Terms of Service link text
+   */
+  termsText?: string;
+  /**
+   * Callback when Privacy Policy is pressed
+   */
+  onPrivacyPress?: () => void;
+  /**
+   * Callback when Terms of Service is pressed
+   */
+  onTermsPress?: () => void;
+  /**
+   * Additional styles
+   */
   style?: object;
 }
 
-const DEFAULT_PRIVACY_URL = "https://vivoim.app/privacy";
-const DEFAULT_TERMS_URL = "https://vivoim.app/terms";
-
 export const LegalLinks: React.FC<LegalLinksProps> = React.memo(
   ({
-    privacyPolicyUrl = DEFAULT_PRIVACY_URL,
-    termsOfServiceUrl = DEFAULT_TERMS_URL,
+    privacyPolicyUrl,
+    termsOfServiceUrl,
+    privacyText = "Privacy Policy",
+    termsText = "Terms of Service",
+    onPrivacyPress,
+    onTermsPress,
     style,
   }) => {
-    const tokens = useAppDesignTokens();
-    const { t } = useLocalization();
-
-    const handlePrivacyPress = () => {
-      Linking.openURL(privacyPolicyUrl);
+    const handlePrivacyPress = async () => {
+      if (onPrivacyPress) {
+        onPrivacyPress();
+      } else if (privacyPolicyUrl) {
+        const { UrlHandlerService } = await import('../../domain/services/UrlHandlerService');
+        await UrlHandlerService.openUrl(privacyPolicyUrl);
+      }
     };
 
-    const handleTermsPress = () => {
-      Linking.openURL(termsOfServiceUrl);
+    const handleTermsPress = async () => {
+      if (onTermsPress) {
+        onTermsPress();
+      } else if (termsOfServiceUrl) {
+        const { UrlHandlerService } = await import('../../domain/services/UrlHandlerService');
+        await UrlHandlerService.openUrl(termsOfServiceUrl);
+      }
     };
 
     return (
       <View style={[styles.container, style]}>
-        <TouchableOpacity onPress={handlePrivacyPress} hitSlop={styles.hitSlop}>
+        {(onPrivacyPress || privacyPolicyUrl) && (
+          <TouchableOpacity onPress={handlePrivacyPress} hitSlop={styles.hitSlop}>
+            <AtomicText
+              type="labelSmall"
+              color="primary"
+              style={styles.link}
+            >
+              {privacyText}
+            </AtomicText>
+          </TouchableOpacity>
+        )}
+        {(onPrivacyPress || privacyPolicyUrl) && (onTermsPress || termsOfServiceUrl) && (
           <AtomicText
             type="labelSmall"
-            style={[styles.link, { color: tokens.colors.primary }]}
+            color="textTertiary"
           >
-            {t("legal.privacyPolicy", "Privacy Policy")}
+            {" • "}
           </AtomicText>
-        </TouchableOpacity>
-        <AtomicText
-          type="labelSmall"
-          style={{ color: tokens.colors.textTertiary }}
-        >
-          {" • "}
-        </AtomicText>
-        <TouchableOpacity onPress={handleTermsPress} hitSlop={styles.hitSlop}>
-          <AtomicText
-            type="labelSmall"
-            style={[styles.link, { color: tokens.colors.primary }]}
-          >
-            {t("legal.termsOfService", "Terms of Service")}
-          </AtomicText>
-        </TouchableOpacity>
+        )}
+        {(onTermsPress || termsOfServiceUrl) && (
+          <TouchableOpacity onPress={handleTermsPress} hitSlop={styles.hitSlop}>
+            <AtomicText
+              type="labelSmall"
+              color="primary"
+              style={styles.link}
+            >
+              {termsText}
+            </AtomicText>
+          </TouchableOpacity>
+        )}
       </View>
     );
   },

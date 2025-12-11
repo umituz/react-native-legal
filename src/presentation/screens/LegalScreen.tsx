@@ -8,11 +8,12 @@
  */
 
 import React from "react";
-import { View, StyleSheet, Linking } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { useAppDesignTokens, type DesignTokens } from "@umituz/react-native-design-system-theme";
 import { AtomicText } from "@umituz/react-native-design-system-atoms";
 import { ScreenLayout } from "@umituz/react-native-design-system-organisms";
 import { LegalItem } from "../components/LegalItem";
+import { UrlHandlerService } from "../../domain/services/UrlHandlerService";
 
 export interface LegalScreenProps {
   /**
@@ -75,62 +76,70 @@ export interface LegalScreenProps {
 }
 
 export const LegalScreen: React.FC<LegalScreenProps> = ({
-  title = "Legal",
-  description = "Legal documents and policies",
-  documentsHeader = "Legal Documents",
-  privacyTitle = "Privacy Policy",
-  privacyDescription = "How we protect your privacy",
-  termsTitle = "Terms of Service",
-  termsDescription = "Terms and conditions of use",
-  eulaTitle = "EULA",
-  eulaDescription = "End User License Agreement",
+  title,
+  description,
+  documentsHeader,
+  privacyTitle,
+  privacyDescription,
+  termsTitle,
+  termsDescription,
+  eulaTitle,
+  eulaDescription,
   onPrivacyPress,
   onTermsPress,
   onEulaPress,
-  eulaUrl = "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/",
+  eulaUrl,
   testID = "legal-screen",
 }) => {
   const tokens = useAppDesignTokens();
   const styles = getStyles(tokens);
 
   const handleEulaPress = async () => {
+    if (__DEV__) {
+      console.log('LegalScreen: EULA pressed', { eulaUrl });
+    }
+    
     if (onEulaPress) {
       onEulaPress();
-    } else {
-      await Linking.openURL(eulaUrl);
+    } else if (eulaUrl) {
+      await UrlHandlerService.openUrl(eulaUrl);
     }
   };
 
   return (
     <ScreenLayout testID={testID} hideScrollIndicator>
       {/* Header */}
-      <View style={styles.header}>
-        <AtomicText type="headlineLarge" color="textPrimary">
-          {title}
-        </AtomicText>
-        {description && (
-          <AtomicText
-            type="bodyMedium"
-            color="textSecondary"
-            style={styles.headerSubtitle}
-          >
-            {description}
+      {title && (
+        <View style={styles.header}>
+          <AtomicText type="headlineLarge" color="textPrimary">
+            {title}
           </AtomicText>
-        )}
-      </View>
+          {description && (
+            <AtomicText
+              type="bodyMedium"
+              color="textSecondary"
+              style={styles.headerSubtitle}
+            >
+              {description}
+            </AtomicText>
+          )}
+        </View>
+      )}
 
       {/* Legal Documents Section */}
       <View style={styles.section}>
-        <AtomicText
-          type="labelLarge"
-          color="textSecondary"
-          style={styles.sectionHeader}
-        >
-          {documentsHeader}
-        </AtomicText>
+        {documentsHeader && (
+          <AtomicText
+            type="labelLarge"
+            color="textSecondary"
+            style={styles.sectionHeader}
+          >
+            {documentsHeader}
+          </AtomicText>
+        )}
 
         {/* Privacy Policy */}
-        {onPrivacyPress && (
+        {onPrivacyPress && privacyTitle && (
           <LegalItem
             iconName="Shield"
             title={privacyTitle}
@@ -141,7 +150,7 @@ export const LegalScreen: React.FC<LegalScreenProps> = ({
         )}
 
         {/* Terms of Service */}
-        {onTermsPress && (
+        {onTermsPress && termsTitle && (
           <LegalItem
             iconName="FileText"
             title={termsTitle}
@@ -152,13 +161,15 @@ export const LegalScreen: React.FC<LegalScreenProps> = ({
         )}
 
         {/* EULA */}
-        <LegalItem
-          iconName="ScrollText"
-          title={eulaTitle}
-          description={eulaDescription}
-          onPress={handleEulaPress}
-          testID="eula-item"
-        />
+        {(onEulaPress || eulaUrl) && eulaTitle && (
+          <LegalItem
+            iconName="ScrollText"
+            title={eulaTitle}
+            description={eulaDescription}
+            onPress={handleEulaPress}
+            testID="eula-item"
+          />
+        )}
       </View>
     </ScreenLayout>
   );

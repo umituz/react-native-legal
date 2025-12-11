@@ -4,11 +4,11 @@
  */
 
 import React from "react";
-import { View, ScrollView, StyleSheet, Linking } from "react-native";
+import { View, ScrollView, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppDesignTokens } from "@umituz/react-native-design-system-theme";
-import { useLocalization } from "@umituz/react-native-localization";
 import { AtomicText, AtomicButton } from "@umituz/react-native-design-system-atoms";
+import { UrlHandlerService } from "../../domain/services/UrlHandlerService";
 
 export interface PrivacyPolicyScreenProps {
   /**
@@ -24,26 +24,44 @@ export interface PrivacyPolicyScreenProps {
    */
   title?: string;
   /**
+   * Text for viewing online button
+   */
+  viewOnlineText?: string;
+  /**
+   * Text for open button
+   */
+  openText?: string;
+  /**
    * Callback when URL is pressed (if content is not provided)
    */
   onUrlPress?: () => void;
+  /**
+   * Test ID for E2E testing
+   */
+  testID?: string;
 }
 
 export const PrivacyPolicyScreen: React.FC<PrivacyPolicyScreenProps> = ({
   content,
   url,
-  title,
+  title = "Privacy Policy",
+  viewOnlineText = "View Privacy Policy online",
+  openText = "Open Privacy Policy",
   onUrlPress,
+  testID = "privacy-policy-screen",
 }) => {
   const tokens = useAppDesignTokens();
-  const { t } = useLocalization();
   const insets = useSafeAreaInsets();
 
   const handleUrlPress = async () => {
+    if (__DEV__) {
+      console.log('PrivacyPolicyScreen: URL pressed', { url });
+    }
+    
     if (onUrlPress) {
       onUrlPress();
     } else if (url) {
-      await Linking.openURL(url);
+      await UrlHandlerService.openUrl(url);
     }
   };
 
@@ -56,6 +74,7 @@ export const PrivacyPolicyScreen: React.FC<PrivacyPolicyScreenProps> = ({
           paddingTop: insets.top,
         },
       ]}
+      testID={testID}
     >
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -67,7 +86,7 @@ export const PrivacyPolicyScreen: React.FC<PrivacyPolicyScreenProps> = ({
             color="primary"
             style={styles.title}
           >
-            {title || t("legal.privacyPolicy") || "Privacy Policy"}
+            {title}
           </AtomicText>
 
           {content ? (
@@ -81,7 +100,7 @@ export const PrivacyPolicyScreen: React.FC<PrivacyPolicyScreenProps> = ({
                 color="secondary"
                 style={styles.urlText}
               >
-                {t("legal.viewPrivacyOnline") || "View Privacy Policy online"}
+                {viewOnlineText}
               </AtomicText>
               <AtomicButton
                 variant="primary"
@@ -89,7 +108,7 @@ export const PrivacyPolicyScreen: React.FC<PrivacyPolicyScreenProps> = ({
                 fullWidth
                 style={styles.urlButton}
               >
-                {t("legal.openPrivacy") || "Open Privacy Policy"}
+                {openText}
               </AtomicButton>
             </View>
           )}

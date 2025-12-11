@@ -21,3 +21,5 @@ export type { LegalItemProps } from "./presentation/components/LegalItem";
 
 export { LegalLinks } from "./presentation/components/LegalLinks";
 export type { LegalLinksProps } from "./presentation/components/LegalLinks";
+
+export { UrlHandlerService } from "./domain/services/UrlHandlerService";
