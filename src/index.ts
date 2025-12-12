@@ -22,6 +22,10 @@ export type { LegalItemProps } from "./presentation/components/LegalItem";
 export { LegalLinks } from "./presentation/components/LegalLinks";
 export type { LegalLinksProps } from "./presentation/components/LegalLinks";
 
+export { LegalSection } from "./presentation/components/LegalSection";
+export type { LegalSectionProps } from "./presentation/components/LegalSection";
+export type { LegalConfig } from "./domain/entities/LegalConfig";
+
 export { UrlHandlerService } from "./domain/services/UrlHandlerService";
 export { ContentValidationService } from "./domain/services/ContentValidationService";
 export { StyleCacheService } from "./domain/services/StyleCacheService";
