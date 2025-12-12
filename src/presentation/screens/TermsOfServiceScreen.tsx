@@ -41,7 +41,7 @@ export interface TermsOfServiceScreenProps {
   testID?: string;
 }
 
-export const TermsOfServiceScreen: React.FC<TermsOfServiceScreenProps> = ({
+export const TermsOfServiceScreen: React.FC<TermsOfServiceScreenProps> = React.memo(({
   content,
   url,
   title = "Terms of Service",
@@ -52,8 +52,12 @@ export const TermsOfServiceScreen: React.FC<TermsOfServiceScreenProps> = ({
 }) => {
   const tokens = useAppDesignTokens();
   const insets = useSafeAreaInsets();
+  
+  // Use cached styles
+  const styles = getTermsOfServiceStyles();
 
-  const handleUrlPress = async () => {
+  // Memoize URL press handler to prevent child re-renders
+  const handleUrlPress = React.useCallback(async () => {
     if (__DEV__) {
       console.log('TermsOfServiceScreen: URL pressed', { url });
     }
@@ -61,21 +65,66 @@ export const TermsOfServiceScreen: React.FC<TermsOfServiceScreenProps> = ({
     if (onUrlPress) {
       onUrlPress();
     } else if (url) {
-      await UrlHandlerService.openUrl(url);
+      try {
+        await UrlHandlerService.openUrl(url);
+      } catch (error) {
+        if (__DEV__) {
+          console.error('TermsOfServiceScreen: Error opening URL', error);
+        }
+      }
     }
-  };
+  }, [onUrlPress, url]);
+
+  // Memoize container style to prevent object creation
+  const containerStyle = React.useMemo(() => [
+    styles.container,
+    {
+      backgroundColor: tokens.colors.backgroundPrimary,
+      paddingTop: insets.top,
+    },
+  ], [styles.container, tokens.colors.backgroundPrimary, insets.top]);
+
+  // Memoize conditional rendering
+  const showContent = React.useMemo(() => !!(content), [content]);
+  const showUrlSection = React.useMemo(() => !!(url || onUrlPress), [url, onUrlPress]);
+
+  // Memoize content section
+  const contentSection = React.useMemo(() => {
+    if (showContent) {
+      return (
+        <AtomicText type="bodyMedium" color="onSurface" style={styles.text}>
+          {content}
+        </AtomicText>
+      );
+    }
+
+    if (showUrlSection) {
+      return (
+        <View style={styles.urlContainer}>
+          <AtomicText
+            type="bodyMedium"
+            color="secondary"
+            style={styles.urlText}
+          >
+            {viewOnlineText}
+          </AtomicText>
+          <AtomicButton
+            variant="primary"
+            onPress={handleUrlPress}
+            fullWidth
+            style={styles.urlButton}
+          >
+            {openText}
+          </AtomicButton>
+        </View>
+      );
+    }
+
+    return null;
+  }, [showContent, showUrlSection, styles.text, styles.urlContainer, styles.urlText, styles.urlButton, content, viewOnlineText, openText, handleUrlPress]);
 
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          backgroundColor: tokens.colors.backgroundPrimary,
-          paddingTop: insets.top,
-        },
-      ]}
-      testID={testID}
-    >
+    <View style={containerStyle} testID={testID}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -89,34 +138,12 @@ export const TermsOfServiceScreen: React.FC<TermsOfServiceScreenProps> = ({
             {title}
           </AtomicText>
 
-          {content ? (
-            <AtomicText type="bodyMedium" color="onSurface" style={styles.text}>
-              {content}
-            </AtomicText>
-          ) : (
-            <View style={styles.urlContainer}>
-              <AtomicText
-                type="bodyMedium"
-                color="secondary"
-                style={styles.urlText}
-              >
-                {viewOnlineText}
-              </AtomicText>
-              <AtomicButton
-                variant="primary"
-                onPress={handleUrlPress}
-                fullWidth
-                style={styles.urlButton}
-              >
-                {openText}
-              </AtomicButton>
-            </View>
-          )}
+          {contentSection}
         </View>
       </ScrollView>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {

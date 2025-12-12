@@ -49,27 +49,55 @@ export const LegalLinks: React.FC<LegalLinksProps> = React.memo(
     onTermsPress,
     style,
   }) => {
-    const handlePrivacyPress = async () => {
+    // Cache UrlHandlerService import to prevent repeated imports
+    const urlServiceRef = React.useRef<any>(null);
+    
+    const getUrlService = React.useCallback(async () => {
+      if (!urlServiceRef.current) {
+        urlServiceRef.current = await import('../../domain/services/UrlHandlerService');
+      }
+      return urlServiceRef.current;
+    }, []);
+
+    // Memoize press handlers to prevent child re-renders
+    const handlePrivacyPress = React.useCallback(async () => {
       if (onPrivacyPress) {
         onPrivacyPress();
       } else if (privacyPolicyUrl) {
-        const { UrlHandlerService } = await import('../../domain/services/UrlHandlerService');
-        await UrlHandlerService.openUrl(privacyPolicyUrl);
+        try {
+          const { UrlHandlerService } = await getUrlService();
+          await UrlHandlerService.openUrl(privacyPolicyUrl);
+        } catch (error) {
+          if (__DEV__) {
+            console.error('LegalLinks: Error opening privacy policy URL', error);
+          }
+        }
       }
-    };
+    }, [onPrivacyPress, privacyPolicyUrl, getUrlService]);
 
-    const handleTermsPress = async () => {
+    const handleTermsPress = React.useCallback(async () => {
       if (onTermsPress) {
         onTermsPress();
       } else if (termsOfServiceUrl) {
-        const { UrlHandlerService } = await import('../../domain/services/UrlHandlerService');
-        await UrlHandlerService.openUrl(termsOfServiceUrl);
+        try {
+          const { UrlHandlerService } = await getUrlService();
+          await UrlHandlerService.openUrl(termsOfServiceUrl);
+        } catch (error) {
+          if (__DEV__) {
+            console.error('LegalLinks: Error opening terms of service URL', error);
+          }
+        }
       }
-    };
+    }, [onTermsPress, termsOfServiceUrl, getUrlService]);
+
+    // Memoize conditional rendering to prevent unnecessary re-renders
+    const showPrivacy = React.useMemo(() => !!(onPrivacyPress || privacyPolicyUrl), [onPrivacyPress, privacyPolicyUrl]);
+    const showTerms = React.useMemo(() => !!(onTermsPress || termsOfServiceUrl), [onTermsPress, termsOfServiceUrl]);
+    const showSeparator = React.useMemo(() => showPrivacy && showTerms, [showPrivacy, showTerms]);
 
     return (
       <View style={[styles.container, style]}>
-        {(onPrivacyPress || privacyPolicyUrl) && (
+        {showPrivacy && (
           <TouchableOpacity onPress={handlePrivacyPress} hitSlop={styles.hitSlop}>
             <AtomicText
               type="labelSmall"
@@ -80,7 +108,7 @@ export const LegalLinks: React.FC<LegalLinksProps> = React.memo(
             </AtomicText>
           </TouchableOpacity>
         )}
-        {(onPrivacyPress || privacyPolicyUrl) && (onTermsPress || termsOfServiceUrl) && (
+        {showSeparator && (
           <AtomicText
             type="labelSmall"
             color="textTertiary"
@@ -88,7 +116,7 @@ export const LegalLinks: React.FC<LegalLinksProps> = React.memo(
             {" • "}
           </AtomicText>
         )}
-        {(onTermsPress || termsOfServiceUrl) && (
+        {showTerms && (
           <TouchableOpacity onPress={handleTermsPress} hitSlop={styles.hitSlop}>
             <AtomicText
               type="labelSmall"

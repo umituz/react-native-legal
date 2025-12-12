@@ -39,7 +39,7 @@ export interface LegalItemProps {
   testID?: string;
 }
 
-export const LegalItem: React.FC<LegalItemProps> = ({
+export const LegalItem: React.FC<LegalItemProps> = React.memo(({
   iconName,
   icon,
   title,
@@ -48,9 +48,12 @@ export const LegalItem: React.FC<LegalItemProps> = ({
   testID,
 }) => {
   const tokens = useAppDesignTokens();
-  const styles = getStyles(tokens);
+  
+  // Memoize styles to prevent recreation on every render
+  const styles = React.useMemo(() => getStyles(tokens), [tokens]);
 
-  const renderIcon = () => {
+  // Memoize icon rendering to prevent unnecessary re-renders
+  const renderIcon = React.useCallback(() => {
     if (iconName) {
       return (
         <AtomicIcon
@@ -68,12 +71,19 @@ export const LegalItem: React.FC<LegalItemProps> = ({
       );
     }
     return null;
-  };
+  }, [iconName, icon]);
 
-  const content = (
+  // Memoize icon container style to prevent object creation
+  const iconContainerStyle = React.useMemo(() => [
+    styles.iconContainer, 
+    { backgroundColor: tokens.colors.info + "20" }
+  ], [styles.iconContainer, tokens.colors.info]);
+
+  // Memoize content to prevent unnecessary re-renders
+  const content = React.useMemo(() => (
     <View style={styles.itemContent}>
       <View style={styles.itemLeft}>
-        <View style={[styles.iconContainer, { backgroundColor: tokens.colors.info + "20" }]}>
+        <View style={iconContainerStyle}>
           {renderIcon()}
         </View>
         <View style={styles.itemText}>
@@ -95,13 +105,18 @@ export const LegalItem: React.FC<LegalItemProps> = ({
         <AtomicText type="bodyMedium" color="textSecondary">›</AtomicText>
       )}
     </View>
-  );
+  ), [styles.itemContent, styles.itemLeft, styles.itemText, styles.itemDescription, iconContainerStyle, renderIcon, title, description, onPress]);
+
+  // Memoize press handler to prevent child re-renders
+  const handlePress = React.useCallback(() => {
+    onPress?.();
+  }, [onPress]);
 
   if (onPress) {
     return (
       <TouchableOpacity
         style={styles.itemContainer}
-        onPress={onPress}
+        onPress={handlePress}
         testID={testID}
         activeOpacity={0.7}
       >
@@ -115,10 +130,22 @@ export const LegalItem: React.FC<LegalItemProps> = ({
       {content}
     </View>
   );
-};
+});
 
-const getStyles = (tokens: DesignTokens) =>
-  StyleSheet.create({
+// Cache styles to prevent recreation
+const styleCache = new Map<string, any>();
+
+const getStyles = (tokens: DesignTokens) => {
+  const cacheKey = JSON.stringify({
+    xs: tokens.spacing.xs,
+    md: tokens.spacing.md,
+  });
+  
+  if (styleCache.has(cacheKey)) {
+    return styleCache.get(cacheKey);
+  }
+  
+  const styles = StyleSheet.create({
     itemContainer: {
       marginBottom: tokens.spacing.xs,
     },
@@ -150,4 +177,14 @@ const getStyles = (tokens: DesignTokens) =>
       marginTop: tokens.spacing.xs,
     },
   });
+  
+  // Limit cache size to prevent memory leaks
+  if (styleCache.size > 50) {
+    const firstKey = styleCache.keys().next().value;
+    styleCache.delete(firstKey);
+  }
+  
+  styleCache.set(cacheKey, styles);
+  return styles;
+};
 

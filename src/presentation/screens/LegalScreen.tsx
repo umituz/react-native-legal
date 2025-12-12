@@ -75,7 +75,7 @@ export interface LegalScreenProps {
   testID?: string;
 }
 
-export const LegalScreen: React.FC<LegalScreenProps> = ({
+export const LegalScreen: React.FC<LegalScreenProps> = React.memo(({
   title,
   description,
   documentsHeader,
@@ -92,9 +92,12 @@ export const LegalScreen: React.FC<LegalScreenProps> = ({
   testID = "legal-screen",
 }) => {
   const tokens = useAppDesignTokens();
-  const styles = getStyles(tokens);
+  
+  // Memoize styles to prevent recreation on every render
+  const styles = React.useMemo(() => getStyles(tokens), [tokens]);
 
-  const handleEulaPress = async () => {
+  // Memoize EULA press handler to prevent child re-renders
+  const handleEulaPress = React.useCallback(async () => {
     if (__DEV__) {
       console.log('LegalScreen: EULA pressed', { eulaUrl });
     }
@@ -102,33 +105,54 @@ export const LegalScreen: React.FC<LegalScreenProps> = ({
     if (onEulaPress) {
       onEulaPress();
     } else if (eulaUrl) {
-      await UrlHandlerService.openUrl(eulaUrl);
+      try {
+        await UrlHandlerService.openUrl(eulaUrl);
+      } catch (error) {
+        if (__DEV__) {
+          console.error('LegalScreen: Error opening EULA URL', error);
+        }
+      }
     }
-  };
+  }, [onEulaPress, eulaUrl]);
+
+  // Memoize conditional rendering to prevent unnecessary re-renders
+  const showHeader = React.useMemo(() => !!(title), [title]);
+  const showDescription = React.useMemo(() => !!(description), [description]);
+  const showSectionHeader = React.useMemo(() => !!(documentsHeader), [documentsHeader]);
+  const showPrivacy = React.useMemo(() => !!(onPrivacyPress && privacyTitle), [onPrivacyPress, privacyTitle]);
+  const showTerms = React.useMemo(() => !!(onTermsPress && termsTitle), [onTermsPress, termsTitle]);
+  const showEula = React.useMemo(() => !!((onEulaPress || eulaUrl) && eulaTitle), [onEulaPress, eulaUrl, eulaTitle]);
+
+  // Memoize header content
+  const headerContent = React.useMemo(() => {
+    if (!showHeader) return null;
+    
+    return (
+      <View style={styles.header}>
+        <AtomicText type="headlineLarge" color="textPrimary">
+          {title}
+        </AtomicText>
+        {showDescription && (
+          <AtomicText
+            type="bodyMedium"
+            color="textSecondary"
+            style={styles.headerSubtitle}
+          >
+            {description}
+          </AtomicText>
+        )}
+      </View>
+    );
+  }, [showHeader, showDescription, styles.header, styles.headerSubtitle, title, description]);
 
   return (
     <ScreenLayout testID={testID} hideScrollIndicator>
       {/* Header */}
-      {title && (
-        <View style={styles.header}>
-          <AtomicText type="headlineLarge" color="textPrimary">
-            {title}
-          </AtomicText>
-          {description && (
-            <AtomicText
-              type="bodyMedium"
-              color="textSecondary"
-              style={styles.headerSubtitle}
-            >
-              {description}
-            </AtomicText>
-          )}
-        </View>
-      )}
+      {headerContent}
 
       {/* Legal Documents Section */}
       <View style={styles.section}>
-        {documentsHeader && (
+        {showSectionHeader && (
           <AtomicText
             type="labelLarge"
             color="textSecondary"
@@ -139,7 +163,7 @@ export const LegalScreen: React.FC<LegalScreenProps> = ({
         )}
 
         {/* Privacy Policy */}
-        {onPrivacyPress && privacyTitle && (
+        {showPrivacy && (
           <LegalItem
             iconName="Shield"
             title={privacyTitle}
@@ -150,7 +174,7 @@ export const LegalScreen: React.FC<LegalScreenProps> = ({
         )}
 
         {/* Terms of Service */}
-        {onTermsPress && termsTitle && (
+        {showTerms && (
           <LegalItem
             iconName="FileText"
             title={termsTitle}
@@ -161,7 +185,7 @@ export const LegalScreen: React.FC<LegalScreenProps> = ({
         )}
 
         {/* EULA */}
-        {(onEulaPress || eulaUrl) && eulaTitle && (
+        {showEula && (
           <LegalItem
             iconName="ScrollText"
             title={eulaTitle}
@@ -173,10 +197,24 @@ export const LegalScreen: React.FC<LegalScreenProps> = ({
       </View>
     </ScreenLayout>
   );
-};
+});
 
-const getStyles = (tokens: DesignTokens) =>
-  StyleSheet.create({
+// Cache styles to prevent recreation
+const legalScreenStyleCache = new Map<string, any>();
+
+const getStyles = (tokens: DesignTokens) => {
+  const cacheKey = JSON.stringify({
+    xs: tokens.spacing.xs,
+    sm: tokens.spacing.sm,
+    md: tokens.spacing.md,
+    lg: tokens.spacing.lg,
+  });
+  
+  if (legalScreenStyleCache.has(cacheKey)) {
+    return legalScreenStyleCache.get(cacheKey);
+  }
+  
+  const styles = StyleSheet.create({
     header: {
       paddingBottom: tokens.spacing.lg,
       paddingTop: tokens.spacing.md,
@@ -192,3 +230,13 @@ const getStyles = (tokens: DesignTokens) =>
       paddingHorizontal: tokens.spacing.md,
     },
   });
+  
+  // Limit cache size to prevent memory leaks
+  if (legalScreenStyleCache.size > 50) {
+    const firstKey = legalScreenStyleCache.keys().next().value;
+    legalScreenStyleCache.delete(firstKey);
+  }
+  
+  legalScreenStyleCache.set(cacheKey, styles);
+  return styles;
+};
