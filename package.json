@@ -1,6 +1,6 @@
 {
   "name": "@umituz/react-native-legal",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Legal screens for React Native apps - Terms of Service and Privacy Policy",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
