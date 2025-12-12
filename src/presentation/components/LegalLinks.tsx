@@ -7,6 +7,7 @@
 import React from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { AtomicText } from "@umituz/react-native-design-system-atoms";
+import { ContentValidationService } from "../../domain/services/ContentValidationService";
 
 export interface LegalLinksProps {
   /**
@@ -18,11 +19,11 @@ export interface LegalLinksProps {
    */
   termsOfServiceUrl?: string;
   /**
-   * Privacy Policy link text
+   * Privacy Policy link text (required when privacyPolicyUrl is provided)
    */
   privacyText?: string;
   /**
-   * Terms of Service link text
+   * Terms of Service link text (required when termsOfServiceUrl is provided)
    */
   termsText?: string;
   /**
@@ -43,12 +44,24 @@ export const LegalLinks: React.FC<LegalLinksProps> = React.memo(
   ({
     privacyPolicyUrl,
     termsOfServiceUrl,
-    privacyText = "Privacy Policy",
-    termsText = "Terms of Service",
+    privacyText,
+    termsText,
     onPrivacyPress,
     onTermsPress,
     style,
   }) => {
+    // Validate required props
+    React.useEffect(() => {
+      ContentValidationService.validateLegalLinks(
+        privacyPolicyUrl,
+        termsOfServiceUrl,
+        privacyText,
+        termsText,
+        onPrivacyPress,
+        onTermsPress
+      );
+    }, [privacyPolicyUrl, termsOfServiceUrl, privacyText, termsText, onPrivacyPress, onTermsPress]);
+
     // Cache UrlHandlerService import to prevent repeated imports
     const urlServiceRef = React.useRef<any>(null);
     

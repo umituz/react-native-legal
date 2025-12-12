@@ -1,6 +1,6 @@
 {
   "name": "@umituz/react-native-legal",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "Legal screens for React Native apps - Terms of Service and Privacy Policy",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
@@ -8,6 +8,9 @@
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "prepublishOnly": "npm run build",
     "version:patch": "npm version patch -m 'chore: release v%s'",
     "version:minor": "npm version minor -m 'chore: release v%s'",
@@ -43,10 +46,13 @@
     "react-native-safe-area-context": "^4.0.0"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.0",
     "@types/react": "^18.2.45",
     "@types/react-native": "^0.73.0",
+    "jest": "^29.5.0",
     "react": "^18.2.0",
     "react-native": "^0.74.0",
+    "ts-jest": "^29.1.0",
     "typescript": "^5.9.3"
   },
   "publishConfig": {

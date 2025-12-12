@@ -10,6 +10,7 @@ import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { useAppDesignTokens, type DesignTokens } from "@umituz/react-native-design-system-theme";
 import { AtomicText, AtomicIcon } from "@umituz/react-native-design-system-atoms";
 import type { IconName } from "@umituz/react-native-design-system-atoms";
+import { StyleCacheService } from "../../domain/services/StyleCacheService";
 
 export interface LegalItemProps {
   /**
@@ -50,7 +51,14 @@ export const LegalItem: React.FC<LegalItemProps> = React.memo(({
   const tokens = useAppDesignTokens();
   
   // Memoize styles to prevent recreation on every render
-  const styles = React.useMemo(() => getStyles(tokens), [tokens]);
+  const styles = React.useMemo(() => {
+    const cacheKey = StyleCacheService.createTokenCacheKey(tokens);
+    return StyleCacheService.getCachedStyles(
+      'LegalItem',
+      cacheKey,
+      () => createLegalItemStyles(tokens)
+    );
+  }, [tokens]);
 
   // Memoize icon rendering to prevent unnecessary re-renders
   const renderIcon = React.useCallback(() => {
@@ -132,20 +140,8 @@ export const LegalItem: React.FC<LegalItemProps> = React.memo(({
   );
 });
 
-// Cache styles to prevent recreation
-const styleCache = new Map<string, any>();
-
-const getStyles = (tokens: DesignTokens) => {
-  const cacheKey = JSON.stringify({
-    xs: tokens.spacing.xs,
-    md: tokens.spacing.md,
-  });
-  
-  if (styleCache.has(cacheKey)) {
-    return styleCache.get(cacheKey);
-  }
-  
-  const styles = StyleSheet.create({
+const createLegalItemStyles = (tokens: DesignTokens) => {
+  return StyleSheet.create({
     itemContainer: {
       marginBottom: tokens.spacing.xs,
     },
@@ -177,14 +173,5 @@ const getStyles = (tokens: DesignTokens) => {
       marginTop: tokens.spacing.xs,
     },
   });
-  
-  // Limit cache size to prevent memory leaks
-  if (styleCache.size > 50) {
-    const firstKey = styleCache.keys().next().value;
-    styleCache.delete(firstKey);
-  }
-  
-  styleCache.set(cacheKey, styles);
-  return styles;
 };
 

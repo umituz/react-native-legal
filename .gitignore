@@ -12,6 +12,65 @@ build/
 lib/
 *.tsbuildinfo
 
+# TypeScript
+*.tsbuildinfo
+
+# Runtime
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage
+coverage/
+*.lcov
+.nyc_output/
+
+# Logs
+logs
+*.log
+
+# Cache
+.cache
+.parcel-cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+.npm
+.eslintcache
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Temporary
+tmp/
+temp/
+
+# Package
+*.tgz
+*.tar.gz
+
+# Testing
+.nyc_output/
+
 # Runtime data
 pids
 *.pid

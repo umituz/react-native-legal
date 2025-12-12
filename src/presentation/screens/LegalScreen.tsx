@@ -14,6 +14,8 @@ import { AtomicText } from "@umituz/react-native-design-system-atoms";
 import { ScreenLayout } from "@umituz/react-native-design-system-organisms";
 import { LegalItem } from "../components/LegalItem";
 import { UrlHandlerService } from "../../domain/services/UrlHandlerService";
+import { ContentValidationService } from "../../domain/services/ContentValidationService";
+import { StyleCacheService } from "../../domain/services/StyleCacheService";
 
 export interface LegalScreenProps {
   /**
@@ -94,7 +96,14 @@ export const LegalScreen: React.FC<LegalScreenProps> = React.memo(({
   const tokens = useAppDesignTokens();
   
   // Memoize styles to prevent recreation on every render
-  const styles = React.useMemo(() => getStyles(tokens), [tokens]);
+  const styles = React.useMemo(() => {
+    const cacheKey = StyleCacheService.createTokenCacheKey(tokens);
+    return StyleCacheService.getCachedStyles(
+      'LegalScreen',
+      cacheKey,
+      () => createLegalScreenStyles(tokens)
+    );
+  }, [tokens]);
 
   // Memoize EULA press handler to prevent child re-renders
   const handleEulaPress = React.useCallback(async () => {
@@ -119,9 +128,18 @@ export const LegalScreen: React.FC<LegalScreenProps> = React.memo(({
   const showHeader = React.useMemo(() => !!(title), [title]);
   const showDescription = React.useMemo(() => !!(description), [description]);
   const showSectionHeader = React.useMemo(() => !!(documentsHeader), [documentsHeader]);
-  const showPrivacy = React.useMemo(() => !!(onPrivacyPress && privacyTitle), [onPrivacyPress, privacyTitle]);
-  const showTerms = React.useMemo(() => !!(onTermsPress && termsTitle), [onTermsPress, termsTitle]);
-  const showEula = React.useMemo(() => !!((onEulaPress || eulaUrl) && eulaTitle), [onEulaPress, eulaUrl, eulaTitle]);
+  const showPrivacy = React.useMemo(() => 
+    ContentValidationService.shouldShowLegalItem(onPrivacyPress, privacyTitle), 
+    [onPrivacyPress, privacyTitle]
+  );
+  const showTerms = React.useMemo(() => 
+    ContentValidationService.shouldShowLegalItem(onTermsPress, termsTitle), 
+    [onTermsPress, termsTitle]
+  );
+  const showEula = React.useMemo(() => 
+    !!((onEulaPress || eulaUrl) && eulaTitle), 
+    [onEulaPress, eulaUrl, eulaTitle]
+  );
 
   // Memoize header content
   const headerContent = React.useMemo(() => {
@@ -166,7 +184,7 @@ export const LegalScreen: React.FC<LegalScreenProps> = React.memo(({
         {showPrivacy && (
           <LegalItem
             iconName="Shield"
-            title={privacyTitle}
+            title={privacyTitle!}
             description={privacyDescription}
             onPress={onPrivacyPress}
             testID="privacy-policy-item"
@@ -177,7 +195,7 @@ export const LegalScreen: React.FC<LegalScreenProps> = React.memo(({
         {showTerms && (
           <LegalItem
             iconName="FileText"
-            title={termsTitle}
+            title={termsTitle!}
             description={termsDescription}
             onPress={onTermsPress}
             testID="terms-of-service-item"
@@ -188,7 +206,7 @@ export const LegalScreen: React.FC<LegalScreenProps> = React.memo(({
         {showEula && (
           <LegalItem
             iconName="ScrollText"
-            title={eulaTitle}
+            title={eulaTitle!}
             description={eulaDescription}
             onPress={handleEulaPress}
             testID="eula-item"
@@ -199,22 +217,8 @@ export const LegalScreen: React.FC<LegalScreenProps> = React.memo(({
   );
 });
 
-// Cache styles to prevent recreation
-const legalScreenStyleCache = new Map<string, any>();
-
-const getStyles = (tokens: DesignTokens) => {
-  const cacheKey = JSON.stringify({
-    xs: tokens.spacing.xs,
-    sm: tokens.spacing.sm,
-    md: tokens.spacing.md,
-    lg: tokens.spacing.lg,
-  });
-  
-  if (legalScreenStyleCache.has(cacheKey)) {
-    return legalScreenStyleCache.get(cacheKey);
-  }
-  
-  const styles = StyleSheet.create({
+const createLegalScreenStyles = (tokens: DesignTokens) => {
+  return StyleSheet.create({
     header: {
       paddingBottom: tokens.spacing.lg,
       paddingTop: tokens.spacing.md,
@@ -230,13 +234,4 @@ const getStyles = (tokens: DesignTokens) => {
       paddingHorizontal: tokens.spacing.md,
     },
   });
-  
-  // Limit cache size to prevent memory leaks
-  if (legalScreenStyleCache.size > 50) {
-    const firstKey = legalScreenStyleCache.keys().next().value;
-    legalScreenStyleCache.delete(firstKey);
-  }
-  
-  legalScreenStyleCache.set(cacheKey, styles);
-  return styles;
 };

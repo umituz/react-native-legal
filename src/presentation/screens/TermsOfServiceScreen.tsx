@@ -9,26 +9,30 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppDesignTokens } from "@umituz/react-native-design-system-theme";
 import { AtomicText, AtomicButton } from "@umituz/react-native-design-system-atoms";
 import { UrlHandlerService } from "../../domain/services/UrlHandlerService";
+import { ContentValidationService } from "../../domain/services/ContentValidationService";
+import { StyleCacheService } from "../../domain/services/StyleCacheService";
 
 export interface TermsOfServiceScreenProps {
   /**
    * Terms of Service content (HTML or plain text)
+   * Either content or url must be provided
    */
   content?: string;
   /**
    * Terms of Service URL (if content is not provided, will open URL)
+   * Either content or url must be provided
    */
   url?: string;
   /**
    * Custom title
    */
-  title?: string;
+  title: string;
   /**
-   * Text for viewing online button
+   * Text for viewing online button (required when url is provided)
    */
   viewOnlineText?: string;
   /**
-   * Text for open button
+   * Text for open button (required when url is provided)
    */
   openText?: string;
   /**
@@ -44,17 +48,35 @@ export interface TermsOfServiceScreenProps {
 export const TermsOfServiceScreen: React.FC<TermsOfServiceScreenProps> = React.memo(({
   content,
   url,
-  title = "Terms of Service",
-  viewOnlineText = "View Terms of Service online",
-  openText = "Open Terms of Service",
+  title,
+  viewOnlineText,
+  openText,
   onUrlPress,
   testID = "terms-of-service-screen",
 }) => {
   const tokens = useAppDesignTokens();
   const insets = useSafeAreaInsets();
   
+  // Validate required props
+  React.useEffect(() => {
+    ContentValidationService.validateScreenContent(
+      content,
+      url,
+      title,
+      viewOnlineText,
+      openText,
+      'TermsOfServiceScreen'
+    );
+  }, [content, url, title, viewOnlineText, openText]);
+  
   // Use cached styles
-  const styles = getTermsOfServiceStyles();
+  const styles = React.useMemo(() => {
+    return StyleCacheService.getCachedStyles(
+      'TermsOfServiceScreen',
+      'terms-of-service-styles',
+      createTermsOfServiceStyles
+    );
+  }, []);
 
   // Memoize URL press handler to prevent child re-renders
   const handleUrlPress = React.useCallback(async () => {
@@ -86,7 +108,10 @@ export const TermsOfServiceScreen: React.FC<TermsOfServiceScreenProps> = React.m
 
   // Memoize conditional rendering
   const showContent = React.useMemo(() => !!(content), [content]);
-  const showUrlSection = React.useMemo(() => !!(url || onUrlPress), [url, onUrlPress]);
+  const showUrlSection = React.useMemo(() => 
+    ContentValidationService.shouldShowUrlSection(url, onUrlPress), 
+    [url, onUrlPress]
+  );
 
   // Memoize content section
   const contentSection = React.useMemo(() => {
@@ -145,35 +170,37 @@ export const TermsOfServiceScreen: React.FC<TermsOfServiceScreenProps> = React.m
   );
 });
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    padding: 20,
-  },
-  content: {
-    flex: 1,
-  },
-  title: {
-    marginBottom: 24,
-  },
-  text: {
-    lineHeight: 24,
-  },
-  urlContainer: {
-    marginTop: 32,
-    alignItems: "center",
-  },
-  urlText: {
-    marginBottom: 16,
-    textAlign: "center",
-  },
-  urlButton: {
-    marginTop: 8,
-  },
-});
+const createTermsOfServiceStyles = () => {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      padding: 20,
+    },
+    content: {
+      flex: 1,
+    },
+    title: {
+      marginBottom: 24,
+    },
+    text: {
+      lineHeight: 24,
+    },
+    urlContainer: {
+      marginTop: 32,
+      alignItems: "center",
+    },
+    urlText: {
+      marginBottom: 16,
+      textAlign: "center",
+    },
+    urlButton: {
+      marginTop: 8,
+    },
+  });
+};
 
 
 

@@ -23,3 +23,5 @@ export { LegalLinks } from "./presentation/components/LegalLinks";
 export type { LegalLinksProps } from "./presentation/components/LegalLinks";
 
 export { UrlHandlerService } from "./domain/services/UrlHandlerService";
+export { ContentValidationService } from "./domain/services/ContentValidationService";
+export { StyleCacheService } from "./domain/services/StyleCacheService";

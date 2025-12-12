@@ -88,7 +88,7 @@ export class UrlHandlerService {
         
         // Cache the result with size limit
         this.cleanCache();
-        urlValidationCache.set(url, canOpen);
+        urlValidationCache.set(url, canOpen || false);
       }
       
       if (canOpen) {
