@@ -64,7 +64,7 @@ export interface LegalScreenProps {
   onTermsPress?: () => void;
   /**
    * Callback when EULA is pressed
-   * If not provided, will open Apple EULA URL
+   * Icon name from Feather library (e.g., "shield", "file-text", "file") EULA URL
    */
   onEulaPress?: () => void;
   /**
@@ -94,7 +94,7 @@ export const LegalScreen: React.FC<LegalScreenProps> = React.memo(({
   testID = "legal-screen",
 }) => {
   const tokens = useAppDesignTokens();
-  
+
   // Memoize styles to prevent recreation on every render
   const styles = React.useMemo(() => {
     const cacheKey = StyleCacheService.createTokenCacheKey(tokens);
@@ -110,7 +110,7 @@ export const LegalScreen: React.FC<LegalScreenProps> = React.memo(({
     if (__DEV__) {
       console.log('LegalScreen: EULA pressed', { eulaUrl });
     }
-    
+
     if (onEulaPress) {
       onEulaPress();
     } else if (eulaUrl) {
@@ -128,23 +128,23 @@ export const LegalScreen: React.FC<LegalScreenProps> = React.memo(({
   const showHeader = React.useMemo(() => !!(title), [title]);
   const showDescription = React.useMemo(() => !!(description), [description]);
   const showSectionHeader = React.useMemo(() => !!(documentsHeader), [documentsHeader]);
-  const showPrivacy = React.useMemo(() => 
-    ContentValidationService.shouldShowLegalItem(onPrivacyPress, privacyTitle), 
+  const showPrivacy = React.useMemo(() =>
+    ContentValidationService.shouldShowLegalItem(onPrivacyPress, privacyTitle),
     [onPrivacyPress, privacyTitle]
   );
-  const showTerms = React.useMemo(() => 
-    ContentValidationService.shouldShowLegalItem(onTermsPress, termsTitle), 
+  const showTerms = React.useMemo(() =>
+    ContentValidationService.shouldShowLegalItem(onTermsPress, termsTitle),
     [onTermsPress, termsTitle]
   );
-  const showEula = React.useMemo(() => 
-    !!((onEulaPress || eulaUrl) && eulaTitle), 
+  const showEula = React.useMemo(() =>
+    !!((onEulaPress || eulaUrl) && eulaTitle),
     [onEulaPress, eulaUrl, eulaTitle]
   );
 
   // Memoize header content
   const headerContent = React.useMemo(() => {
     if (!showHeader) return null;
-    
+
     return (
       <View style={styles.header}>
         <AtomicText type="headlineLarge" color="textPrimary">
@@ -183,7 +183,7 @@ export const LegalScreen: React.FC<LegalScreenProps> = React.memo(({
         {/* Privacy Policy */}
         {showPrivacy && (
           <LegalItem
-            iconName="Shield"
+            iconName="shield"
             title={privacyTitle!}
             description={privacyDescription}
             onPress={onPrivacyPress}
@@ -194,7 +194,7 @@ export const LegalScreen: React.FC<LegalScreenProps> = React.memo(({
         {/* Terms of Service */}
         {showTerms && (
           <LegalItem
-            iconName="FileText"
+            iconName="file-text"
             title={termsTitle!}
             description={termsDescription}
             onPress={onTermsPress}
@@ -205,7 +205,7 @@ export const LegalScreen: React.FC<LegalScreenProps> = React.memo(({
         {/* EULA */}
         {showEula && (
           <LegalItem
-            iconName="ScrollText"
+            iconName="file"
             title={eulaTitle!}
             description={eulaDescription}
             onPress={handleEulaPress}
