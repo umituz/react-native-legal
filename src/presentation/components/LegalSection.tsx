@@ -3,6 +3,7 @@ import { View, Text, Pressable, StyleSheet, ViewStyle } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useAppDesignTokens } from '@umituz/react-native-design-system-theme';
+import { useLocalization } from '@umituz/react-native-localization';
 import { LegalConfig } from '../../domain/entities/LegalConfig';
 
 export interface LegalSectionProps {
@@ -18,11 +19,12 @@ export const LegalSection: React.FC<LegalSectionProps> = ({
 }) => {
     const navigation = useNavigation();
     const tokens = useAppDesignTokens();
+    const { t } = useLocalization();
     const colors = tokens.colors;
 
     const route = config?.route || config?.defaultRoute || 'Legal';
-    const title = config?.title || 'Legal';
-    const description = config?.description || 'Legal information and policies';
+    const title = config?.title || t('settings.legal.title');
+    const description = config?.description || t('settings.legal.description');
 
     const handlePress = () => {
         if (onPress) {
@@ -34,7 +36,7 @@ export const LegalSection: React.FC<LegalSectionProps> = ({
 
     return (
         <View style={[styles.sectionContainer, { backgroundColor: colors.surface }, containerStyle]}>
-            <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>{title}</Text>
+            <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>{t('settings.legal.title')}</Text>
             <Pressable
                 style={({ pressed }) => [
                     styles.itemContainer,
